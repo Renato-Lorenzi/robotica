@@ -1,7 +1,5 @@
 package br.com.futbol.nxt;
 
-import java.util.List;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -11,13 +9,8 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.core.Core.MinMaxLocResult;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.samples.colorblobdetect.R;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -33,8 +26,7 @@ public class BallDetectionActivity extends Activity implements OnTouchListener,
 	private static final String TAG = "OCVSample::Activity";
 
 	private Mat mRgba;
-	private BallDetector mDetector;
-	private Scalar CONTOUR_COLOR;
+	private ColorDetector mDetector;
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -97,10 +89,9 @@ public class BallDetectionActivity extends Activity implements OnTouchListener,
 
 	public void onCameraViewStarted(int width, int height) {
 		mRgba = new Mat(height, width, CvType.CV_8UC4);
-		mDetector = new BallDetector();
+		mDetector = new ColorDetector();
 		// vermelho
 		mDetector.setHsvColor(new Scalar(2.609375, 174.5625, 255.0, 0.0));
-		CONTOUR_COLOR = new Scalar(0, 255, 0, 255);
 	}
 
 	public void onCameraViewStopped() {
@@ -112,30 +103,24 @@ public class BallDetectionActivity extends Activity implements OnTouchListener,
 	}
 
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-		// http://docs.opencv.org/doc/tutorials/imgproc/shapedescriptors/bounding_rects_circles/bounding_rects_circles.html
+
 		mRgba = inputFrame.rgba();
-		mDetector.process(mRgba);
-		List<MatOfPoint> contours = mDetector.getContours();
-		// Log.e(TAG, "Contours count: " + contours.size());
-		if (contours.size() > 0) {
-			MatOfPoint contour = contours.get(0);
-			MatOfPoint2f contour2 = new MatOfPoint2f(contour.toArray());
+		// Log do tamanho da imagem 720 x 480
+		// Log.e(TAG, "Image size - Width: " + mRgba.width() + ", Height: "
+		// + mRgba.height());
+		if (mDetector.detect(mRgba)) {
 
-			MatOfPoint2f contourPoly = new MatOfPoint2f();
-			Imgproc.approxPolyDP(contour2, contourPoly, 3, true);
-			Point center = new Point();
-			float[] radius = new float[1];
-			Imgproc.minEnclosingCircle(contourPoly, center, radius);
+			Point center = mDetector.getCenter();
+			int radius = mDetector.getRadius();
 
-			Core.circle(mRgba, center, (int) radius[0], new Scalar(0, 0, 255),
+			Core.circle(mRgba, center, radius, new Scalar(0, 0, 255), 2, 8, 0);
+
+			Core.circle(mRgba, new Point(10, 10), 100, new Scalar(0, 255, 0),
 					2, 8, 0);
-			// Log.e(TAG, "x: " + center.x + ", y: " + center.y);
 
 			Log.e(TAG, ((center.x > mRgba.cols() / 2) ? "direita" : "esquerda")
 					+ ", x: " + center.x + ", y: " + center.y);
 		}
-
-		// Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
 		return mRgba;
 	}
 }

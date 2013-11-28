@@ -7,10 +7,19 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class BallDetector {
+/**
+ * Detects the color in image and returns the center and the radius of the color
+ * contour.
+ * 
+ * @author renatol
+ * 
+ */
+public class ColorDetector {
 	// Lower and Upper bounds for range checking in HSV color space
 	private Scalar mLowerBound = new Scalar(0);
 	private Scalar mUpperBound = new Scalar(0);
@@ -18,7 +27,8 @@ public class BallDetector {
 	private static double mMinContourArea = 0.1;
 	// Color radius for range checking in HSV color space
 	private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
-	private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
+	private int radius;
+	private Point center;
 
 	// Cache
 	Mat mPyrDownMat = new Mat();
@@ -26,6 +36,13 @@ public class BallDetector {
 	Mat mMask = new Mat();
 	Mat mDilatedMask = new Mat();
 	Mat mHierarchy = new Mat();
+
+	public ColorDetector() {
+	}
+
+	public ColorDetector(Scalar hsvColor) {
+		setHsvColor(hsvColor);
+	}
 
 	public void setHsvColor(Scalar hsvColor) {
 		double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0]
@@ -53,7 +70,14 @@ public class BallDetector {
 		mMinContourArea = area;
 	}
 
-	public void process(Mat rgbaImage) {
+	/**
+	 * Search by color in image defined in <code> setHsvColor</code> and found
+	 * center and radius contour region
+	 * 
+	 * @param rgbaImage
+	 * @return if detected
+	 */
+	public boolean detect(Mat rgbaImage) {
 		Imgproc.pyrDown(rgbaImage, mPyrDownMat);
 		Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
 
@@ -76,18 +100,39 @@ public class BallDetector {
 				maxArea = area;
 		}
 
-		// Filter contours by area and resize to fit the original image size
-		mContours.clear();
-
 		for (MatOfPoint contour : contours) {
 			if (Imgproc.contourArea(contour) > mMinContourArea * maxArea) {
 				Core.multiply(contour, new Scalar(4, 4), contour);
-				mContours.add(contour);
+
+				// http://docs.opencv.org/doc/tutorials/imgproc/shapedescriptors/bounding_rects_circles/bounding_rects_circles.html
+				MatOfPoint2f contour2 = new MatOfPoint2f(contour.toArray());
+
+				MatOfPoint2f contourPoly = new MatOfPoint2f();
+				Imgproc.approxPolyDP(contour2, contourPoly, 3, true);
+				float[] radius = new float[1];
+				center = new Point();
+				Imgproc.minEnclosingCircle(contourPoly, center, radius);
+				this.radius = (int) radius[0];
+				return true;// good why
 			}
 		}
+		return false;
 	}
 
-	public List<MatOfPoint> getContours() {
-		return mContours;
+	/**
+	 * 
+	 * @return the center of color contour
+	 */
+	public Point getCenter() {
+		return center;
 	}
+
+	/**
+	 * 
+	 * @return size in radius to generate a circle
+	 */
+	public int getRadius() {
+		return radius;
+	}
+
 }

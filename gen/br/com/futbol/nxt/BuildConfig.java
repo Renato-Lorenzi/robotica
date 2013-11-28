@@ -1,5 +1,5 @@
 /** Automatically generated file. DO NOT MODIFY */
-package org.opencv.samples.colorblobdetect;
+package br.com.futbol.nxt;
 
 public final class BuildConfig {
     public final static boolean DEBUG = true;
