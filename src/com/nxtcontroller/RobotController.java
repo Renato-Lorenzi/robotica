@@ -1,4 +1,4 @@
-package br.com.futbol.nxt.robot;
+package com.nxtcontroller;
 
 import android.util.Log;
 
@@ -12,7 +12,7 @@ public class RobotController {
 		t = talker;
 		while (t.getState() != NXTTalker.STATE_CONNECTED) {
 			try {
-				Thread.sleep(200);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

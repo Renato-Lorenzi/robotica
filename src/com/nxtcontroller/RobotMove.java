@@ -1,4 +1,4 @@
-package br.com.futbol.nxt.robot;
+package com.nxtcontroller;
 
 public interface RobotMove {
 
