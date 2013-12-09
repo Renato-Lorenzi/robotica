@@ -14,16 +14,22 @@ import com.nxtcontroller.RobotMove;
 import com.nxtcontroller.RobotMoveImpl;
 
 public class RobotManager {
-	private ColorDetector mBallDetector = new ColorDetector(new Scalar(
-			2.609375, 174.5625, 255.0, 0.0));
-	private ColorDetector mRobotDetector = new ColorDetector(new Scalar(0, 255,
-			0));
+	// private ColorDetector mRobotDetector = new ColorDetector(new Scalar(
+	// 2.609375, 174.5625, 255.0, 0.0));
 
-	private ColorDetector trave = new ColorDetector(new Scalar(0, 255, 0));
+	private ColorDetector mRobotDetector;
+
+	private ColorDetector mBallDetector;
+
+	// private ColorDetector trave = new ColorDetector(new Scalar(0, 255, 0));
 
 	private RobotMove robotMove;
 
 	public RobotManager() {
+		mRobotDetector = new ColorDetector(new Scalar(54, 119, 131, 255));
+
+		mBallDetector = new ColorDetector(new Scalar(26, 71, 198, 255));
+
 	}
 
 	public Mat go(Mat mRgba) {

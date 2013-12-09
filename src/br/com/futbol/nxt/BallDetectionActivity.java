@@ -69,7 +69,7 @@ public class BallDetectionActivity extends Activity implements OnTouchListener,
 
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
 		mOpenCvCameraView.setCvCameraViewListener(this);
-		// controller = new RobotController();
+		controller = new RobotManager();
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public class BallDetectionActivity extends Activity implements OnTouchListener,
 					+ ", x: " + center.x + ", y: " + center.y);
 		}
 
-		// controller.go(mRgba);
+		controller.go(mRgba);
 		return mRgba;
 	}
 }
